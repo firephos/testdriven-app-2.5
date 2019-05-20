@@ -1,0 +1,220 @@
+[33mcommit 0b5d587bfe70b7c3f806f12647b7b7a0372cb60b[m[33m ([m[1;36mHEAD[m[33m, [m[1;33mtag: part1[m[33m)[m
+Author: Michael Herman <hermanmu@gmail.com>
+Date:   Sun Mar 17 12:27:45 2019 -0600
+
+    part 1
+
+[1mdiff --git a/docker-compose-prod.yml b/docker-compose-prod.yml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..3329398[m
+[1m--- /dev/null[m
+[1m+++ b/docker-compose-prod.yml[m
+[36m@@ -0,0 +1,37 @@[m
+[32m+[m[32mversion: '3.7'[m
+[32m+[m
+[32m+[m[32mservices:[m
+[32m+[m
+[32m+[m[32m  users:[m
+[32m+[m[32m    build:[m
+[32m+[m[32m      context: ./services/users[m
+[32m+[m[32m      dockerfile: Dockerfile-prod[m
+[32m+[m[32m    expose:[m
+[32m+[m[32m      - 5000[m
+[32m+[m[32m    environment:[m
+[32m+[m[32m      - FLASK_ENV=production[m
+[32m+[m[32m      - APP_SETTINGS=project.config.ProductionConfig[m
+[32m+[m[32m      - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users_prod[m
+[32m+[m[32m      - DATABASE_TEST_URL=postgres://postgres:postgres@users-db:5432/users_test[m
+[32m+[m[32m    depends_on:[m
+[32m+[m[32m      - users-db[m
+[32m+[m
+[32m+[m[32m  users-db:[m
+[32m+[m[32m    build:[m
+[32m+[m[32m      context: ./services/users/project/db[m
+[32m+[m[32m      dockerfile: Dockerfile[m
+[32m+[m[32m    expose:[m
+[32m+[m[32m      - 5432[m
+[32m+[m[32m    environment:[m
+[32m+[m[32m      - POSTGRES_USER=postgres[m
+[32m+[m[32m      - POSTGRES_PASSWORD=postgres[m
+[32m+[m
+[32m+[m[32m  nginx:[m
+[32m+[m[32m    build:[m
+[32m+[m[32m      context: ./services/nginx[m
+[32m+[m[32m      dockerfile: Dockerfile-prod[m
+[32m+[m[32m    restart: always[m
+[32m+[m[32m    ports:[m
+[32m+[m[32m      - 80:80[m
+[32m+[m[32m    depends_on:[m
+[32m+[m[32m      - users[m
+[1mdiff --git a/docker-compose.yml b/docker-compose.yml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..9fcd619[m
+[1m--- /dev/null[m
+[1m+++ b/docker-compose.yml[m
+[36m@@ -0,0 +1,39 @@[m
+[32m+[m[32mversion: '3.7'[m
+[32m+[m
+[32m+[m[32mservices:[m
+[32m+[m
+[32m+[m[32m  users:[m
+[32m+[m[32m    build:[m
+[32m+[m[32m      context: ./services/users[m
+[32m+[m[32m      dockerfile: Dockerfile[m
+[32m+[m[32m    volumes:[m
+[32m+[m[32m      - './services/users:/usr/src/app'[m
+[32m+[m[32m    ports:[m
+[32m+[m[32m      - 5001:5000[m
+[32m+[m[32m    environment:[m
+[32m+[m[32m      - FLASK_ENV=development[m
+[32m+[m[32m      - APP_SETTINGS=project.config.DevelopmentConfig[m
+[32m+[m[32m      - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users_dev[m
+[32m+[m[32m      - DATABASE_TEST_URL=postgres://postgres:postgres@users-db:5432/users_test[m
+[32m+[m[32m    depends_on:[m
+[32m+[m[32m      - users-db[m
+[32m+[m
+[32m+[m[32m  users-db:[m
+[32m+[m[32m    build:[m
+[32m+[m[32m      context: ./services/users/project/db[m
+[32m+[m[32m      dockerfile: Dockerfile[m
+[32m+[m[32m    ports:[m
+[32m+[m[32m      - 5436:5432[m
+[32m+[m[32m    environment:[m
+[32m+[m[32m      - POSTGRES_USER=postgres[m
+[32m+[m[32m      - POSTGRES_PASSWORD=postgres[m
+[32m+[m
+[32m+[m[32m  nginx:[m
+[32m+[m[32m    build:[m
+[32m+[m[32m      context: ./services/nginx[m
+[32m+[m[32m      dockerfile: Dockerfile[m
+[32m+[m[32m    restart: always[m
+[32m+[m[32m    ports:[m
+[32m+[m[32m      - 80:80[m
+[32m+[m[32m    depends_on:[m
+[32m+[m[32m      - users[m
+[1mdiff --git a/services/nginx/Dockerfile b/services/nginx/Dockerfile[m
+[1mnew file mode 100644[m
+[1mindex 0000000..aba3df6[m
+[1m--- /dev/null[m
+[1m+++ b/services/nginx/Dockerfile[m
+[36m@@ -0,0 +1,4 @@[m
+[32m+[m[32mFROM nginx:1.15.9-alpine[m
+[32m+[m
+[32m+[m[32mRUN rm /etc/nginx/conf.d/default.conf[m
+[32m+[m[32mCOPY /dev.conf /etc/nginx/conf.d[m
+[1mdiff --git a/services/nginx/Dockerfile-prod b/services/nginx/Dockerfile-prod[m
+[1mnew file mode 100644[m
+[1mindex 0000000..e6fc34b[m
+[1m--- /dev/null[m
+[1m+++ b/services/nginx/Dockerfile-prod[m
+[36m@@ -0,0 +1,4 @@[m
+[32m+[m[32mFROM nginx:1.15.9-alpine[m
+[32m+[m
+[32m+[m[32mRUN rm /etc/nginx/conf.d/default.conf[m
+[32m+[m[32mCOPY /prod.conf /etc/nginx/conf.d[m
+[1mdiff --git a/services/nginx/dev.conf b/services/nginx/dev.conf[m
+[1mnew file mode 100644[m
+[1mindex 0000000..793807b[m
+[1m--- /dev/null[m
+[1m+++ b/services/nginx/dev.conf[m
+[36m@@ -0,0 +1,14 @@[m
+[32m+[m[32mserver {[m
+[32m+[m
+[32m+[m[32m  listen 80;[m
+[32m+[m
+[32m+[m[32m  location / {[m
+[32m+[m[32m    proxy_pass        http://users:5000;[m
+[32m+[m[32m    proxy_redirect    default;[m
+[32m+[m[32m    proxy_set_header  Host $host;[m
+[32m+[m[32m    proxy_set_header  X-Real-IP $remote_addr;[m
+[32m+[m[32m    proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;[m
+[32m+[m[32m    proxy_set_header  X-Forwarded-Host $server_name;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m}[m
+[1mdiff --git a/services/nginx/prod.conf b/services/nginx/prod.conf[m
+[1mnew file mode 100644[m
+[1mindex 0000000..793807b[m
+[1m--- /dev/null[m
+[1m+++ b/services/nginx/prod.conf[m
+[36m@@ -0,0 +1,14 @@[m
+[32m+[m[32mserver {[m
+[32m+[m
+[32m+[m[32m  listen 80;[m
+[32m+[m
+[32m+[m[32m  location / {[m
+[32m+[m[32m    proxy_pass        http://users:5000;[m
+[32m+[m[32m    proxy_redirect    default;[m
+[32m+[m[32m    proxy_set_header  Host $host;[m
+[32m+[m[32m    proxy_set_header  X-Real-IP $remote_addr;[m
+[32m+[m[32m    proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;[m
+[32m+[m[32m    proxy_set_header  X-Forwarded-Host $server_name;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m}[m
+[1mdiff --git a/services/users/.dockerignore b/services/users/.dockerignore[m
+[1mnew file mode 100644[m
+[1mindex 0000000..adbe3b2[m
+[1m--- /dev/null[m
+[1m+++ b/services/users/.dockerignore[m
+[36m@@ -0,0 +1,4 @@[m
+[32m+[m[32menv[m
+[32m+[m[32m.dockerignore[m
+[32m+[m[32mDockerfile-dev[m
+[32m+[m[32mDockerfile-prod[m
+[1mdiff --git a/services/users/Dockerfile b/services/users/Dockerfile[m
+[1mnew file mode 100644[m
+[1mindex 0000000..bfe1f0a[m
+[1m--- /dev/null[m
+[1m+++ b/services/users/Dockerfile[m
+[36m@@ -0,0 +1,25 @@[m
+[32m+[m[32m# base image[m
+[32m+[m[32mFROM python:3.7.2-alpine[m
+[32m+[m
+[32m+[m[32m# install dependencies[m
+[32m+[m[32mRUN apk update && \[m
+[32m+[m[32m    apk add --virtual build-deps gcc python-dev musl-dev && \[m
+[32m+[m[32m    apk add postgresql-dev && \[m
+[32m+[m[32m    apk add netcat-openbsd[m
+[32m+[m
+[32m+[m[32m# set working directory[m
+[32m+[m[32mWORKDIR /usr/src/app[m
+[32m+[m
+[32m+[m[32m# add and install requirements[m
+[32m+[m[32mCOPY ./requirements.txt /usr/src/app/requirements.txt[m
+[32m+[m[32mRUN pip install -r requirements.txt[m
+[32m+[m
+[32m+[m[32m# add entrypoint.sh[m
+[32m+[m[32mCOPY ./entrypoint.sh /usr/src/app/entrypoint.sh[m
+[32m+[m[32mRUN chmod +x /usr/src/app/entrypoint.sh[m
+[32m+[m
+[32m+[m[32m# add app[m
+[32m+[m[32mCOPY . /usr/src/app[m
+[32m+[m
+[32m+[m[32m# run server[m
+[32m+[m[32mCMD ["/usr/src/app/entrypoint.sh"][m
+[1mdiff --git a/services/users/Dockerfile-prod b/services/users/Dockerfile-prod[m
+[1mnew file mode 100644[m
+[1mindex 0000000..d89c3d3[m
+[1m--- /dev/null[m
+[1m+++ b/services/users/Dockerfile-prod[m
+[36m@@ -0,0 +1,25 @@[m
+[32m+[m[32m# base image[m
+[32m+[m[32mFROM python:3.7.2-alpine[m
+[32m+[m
+[32m+[m[32m# install dependencies[m
+[32m+[m[32mRUN apk update && \[m
+[32m+[m[32m    apk add --virtual build-deps gcc python-dev musl-dev && \[m
+[32m+[m[32m    apk add postgresql-dev && \[m
+[32m+[m[32m    apk add netcat-openbsd[m
+[32m+[m
+[32m+[m[32m# set working directory[m
+[32m+[m[32mWORKDIR /usr/src/app[m
+[32m+[m
+[32m+[m[32m# add and install requirements[m
+[32m+[m[32mCOPY ./requirements.txt /usr/src/app/requirements.txt[m
+[32m+[m[32mRUN pip install -r requirements.txt[m
+[32m+[m
+[32m+[m[32m# add entrypoint.sh[m
+[32m+[m[32mCOPY ./entrypoint.sh /usr/src/app/entrypoint-prod.sh[m
+[32m+[m[3
