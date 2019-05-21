@@ -5,7 +5,7 @@ FROM python:3.7.2-slim
 RUN apt-get update && \
     apt-get -y install netcat && \
     apt-get clean && \
-    apt-get gcc build-essential
+    apt-get -y install gcc build-essential
 
 # set working directory
 WORKDIR /usr/src/app
