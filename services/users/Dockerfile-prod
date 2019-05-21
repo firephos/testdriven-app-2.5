@@ -1,14 +1,16 @@
 # base image
-FROM python:3.7.2-alpine
+FROM python:3.7.2-slim
 
 # install dependencies
-RUN apk update && \
-    apk add --virtual build-deps gcc python-dev musl-dev && \
-    apk add postgresql-dev && \
-    apk add netcat-openbsd
+RUN apt-get update && \
+    apt-get install -y build-essential gcc python3-dev musl-dev && \
+    apt-get install -y postgresql-server-dev-all && \
+    apt-get install -y netcat-openbsd
 
 # set working directory
 WORKDIR /usr/src/app
+
+RUN pip install --upgrade pip
 
 # add and install requirements
 COPY ./requirements.txt /usr/src/app/requirements.txt

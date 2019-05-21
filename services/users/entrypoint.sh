@@ -8,4 +8,6 @@ done
 
 echo "PostgreSQL started"
 
-python manage.py run -h 0.0.0.0
+echo "gunicorn --access-logfile - --error-logfile - --log-level info -k gevent -w 4 manage:app"
+exec gunicorn -b 0.0.0.0:5000 manage:app
+
