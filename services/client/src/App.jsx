@@ -106,6 +106,6 @@ render() {
   )
 }
 
-};
+}
 
 export default App;
