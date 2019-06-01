@@ -181,22 +181,24 @@ class TestUserService(BaseTestCase):
 
     def test_all_users(self):
         """Ensure get all users behaves correctly."""
-        add_user("michael", "michael@mherman.org", "greaterthaneight")
-        add_user("fletcher", "fletcher@notreal.com", "greaterthaneight")
+        add_user('michael', 'michael@mherman.org', 'greaterthaneight')
+        add_user('fletcher', 'fletcher@notreal.com', 'greaterthaneight')
         with self.client:
-            response = self.client.get("/users")
+            response = self.client.get('/users')
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(data["data"]["users"]), 2)
-            self.assertIn("michael", data["data"]["users"][0]["username"])
-            self.assertIn("michael@mherman.org", data["data"]["users"][0]["email"])
-            self.assertTrue(data["data"]["users"][0]["active"])
-            self.assertFalse(data["data"]["users"][0]["admin"])
-            self.assertIn("fletcher", data["data"]["users"][1]["username"])
-            self.assertIn("fletcher@notreal.com", data["data"]["users"][1]["email"])
-            self.assertTrue(data["data"]["users"][1]["active"])
-            self.assertFalse(data["data"]["users"][1]["admin"])
-            self.assertIn("success", data["status"])
+            self.assertEqual(len(data['data']['users']), 2)
+            self.assertIn('michael', data['data']['users'][0]['username'])
+            self.assertIn(
+                'michael@mherman.org', data['data']['users'][0]['email'])
+            self.assertTrue(data['data']['users'][0]['active'])  # new
+            self.assertFalse(data['data']['users'][0]['admin'])  # new
+            self.assertIn('fletcher', data['data']['users'][1]['username'])
+            self.assertIn(
+                'fletcher@notreal.com', data['data']['users'][1]['email'])
+            self.assertTrue(data['data']['users'][1]['active'])  # new
+            self.assertFalse(data['data']['users'][1]['admin'])  # new
+            self.assertIn('success', data['status'])
 
     def test_main_no_users(self):
         """Ensure the main route behaves correctly when no users have been

@@ -2,7 +2,7 @@
 
 
 from sqlalchemy import exc
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template, jsonify
 from flask_restful import Resource, Api
 
 from project import db
@@ -66,12 +66,14 @@ class UsersList(Resource):
         }
         return response_object, 200
 
-    def post(self, resp):
+    def post(self, resp):  # new
         post_data = request.get_json()
         response_object = {"status": "fail", "message": "Invalid payload."}
+        # new
         if not is_admin(resp):
             response_object["message"] = "You do not have permission to do that."
-            return response_object, 401
+            return jsonify(response_object), 401
+
         if not post_data:
             return response_object, 400
         username = post_data.get("username")

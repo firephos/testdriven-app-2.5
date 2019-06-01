@@ -22,7 +22,7 @@ const testData = [
       password: ''
     },
   }
-];
+]
 
 testData.forEach((el) => {
   test(`${el.formType} Form renders properly`, () => {
